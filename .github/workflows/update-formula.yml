@@ -1,0 +1,69 @@
+name: Update Formula
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version (without v prefix, e.g. 0.1.0)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    name: Update cx formula
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Download checksums from release
+        run: |
+          curl -fSL "https://github.com/coralogix/coralogix-cli/releases/download/v${{ inputs.version }}/checksums-sha256.txt" \
+            -o checksums-sha256.txt
+          cat checksums-sha256.txt
+
+      - name: Extract checksums
+        id: meta
+        run: |
+          VERSION="${{ inputs.version }}"
+
+          SHA_MACOS_X86=$(grep "cx-${VERSION}-x86_64-apple-darwin.tar.gz" checksums-sha256.txt | awk '{print $1}')
+          SHA_MACOS_ARM=$(grep "cx-${VERSION}-aarch64-apple-darwin.tar.gz" checksums-sha256.txt | awk '{print $1}')
+          SHA_LINUX_X86=$(grep "cx-${VERSION}-x86_64-unknown-linux-musl.tar.gz" checksums-sha256.txt | awk '{print $1}')
+          SHA_LINUX_ARM=$(grep "cx-${VERSION}-aarch64-unknown-linux-musl.tar.gz" checksums-sha256.txt | awk '{print $1}')
+
+          echo "sha_macos_x86=$SHA_MACOS_X86" >> "$GITHUB_OUTPUT"
+          echo "sha_macos_arm=$SHA_MACOS_ARM" >> "$GITHUB_OUTPUT"
+          echo "sha_linux_x86=$SHA_LINUX_X86" >> "$GITHUB_OUTPUT"
+          echo "sha_linux_arm=$SHA_LINUX_ARM" >> "$GITHUB_OUTPUT"
+
+          for var in SHA_MACOS_X86 SHA_MACOS_ARM SHA_LINUX_X86 SHA_LINUX_ARM; do
+            if [ -z "${!var}" ]; then
+              echo "::error::Missing checksum for $var"
+              exit 1
+            fi
+          done
+
+      - name: Render formula from template
+        run: |
+          sed \
+            -e 's/@@VERSION@@/${{ inputs.version }}/g' \
+            -e 's/@@SHA256_MACOS_X86@@/${{ steps.meta.outputs.sha_macos_x86 }}/g' \
+            -e 's/@@SHA256_MACOS_ARM@@/${{ steps.meta.outputs.sha_macos_arm }}/g' \
+            -e 's/@@SHA256_LINUX_X86@@/${{ steps.meta.outputs.sha_linux_x86 }}/g' \
+            -e 's/@@SHA256_LINUX_ARM@@/${{ steps.meta.outputs.sha_linux_arm }}/g' \
+            templates/cx.rb.template > Formula/cx.rb
+
+      - name: Commit and push to branch
+        run: |
+          BRANCH="update-cx-${{ inputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add Formula/cx.rb
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "cx ${{ inputs.version }}"
+          git push -u origin "$BRANCH"
+          echo "Pushed to branch $BRANCH — create a PR to merge into master"
