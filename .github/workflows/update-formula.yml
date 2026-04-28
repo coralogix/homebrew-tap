@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   update:
@@ -57,13 +58,36 @@ jobs:
             templates/cx.rb.template > Formula/cx.rb
 
       - name: Commit and push to branch
+        id: push
         run: |
           BRANCH="update-cx-${{ inputs.version }}"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -b "$BRANCH"
           git add Formula/cx.rb
-          git diff --cached --quiet && echo "No changes" && exit 0
+          if git diff --cached --quiet; then
+            echo "No changes"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           git commit -m "cx ${{ inputs.version }}"
           git push -u origin "$BRANCH"
-          echo "Pushed to branch $BRANCH — create a PR to merge into master"
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Open pull request
+        if: steps.push.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ steps.push.outputs.branch }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          if gh pr view "$BRANCH" --json number --jq .number >/dev/null 2>&1; then
+            echo "PR already exists for $BRANCH"
+          else
+            gh pr create \
+              --base master \
+              --head "$BRANCH" \
+              --title "cx $VERSION" \
+              --body "Automated formula bump for cx $VERSION."
+          fi
