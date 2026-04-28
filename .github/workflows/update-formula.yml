@@ -20,7 +20,7 @@ jobs:
 
       - name: Download checksums from release
         run: |
-          curl -fSL "https://github.com/coralogix/coralogix-cli/releases/download/v${{ inputs.version }}/checksums-sha256.txt" \
+          curl -fSL "https://github.com/coralogix/cx-cli/releases/download/v${{ inputs.version }}/checksums-sha256.txt" \
             -o checksums-sha256.txt
           cat checksums-sha256.txt
 
