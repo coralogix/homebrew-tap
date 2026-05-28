@@ -30,6 +30,12 @@ class Cx < Formula
     bin.install "cx"
   end
 
+  def post_install
+    cx_dir = Pathname.new(Dir.home) / ".cx"
+    cx_dir.mkpath
+    (cx_dir / "install-method").write("brew")
+  end
+
   test do
     assert_match "cx", shell_output("#{bin}/cx --help")
   end
