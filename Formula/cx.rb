@@ -1,28 +1,28 @@
 class Cx < Formula
   desc "Coralogix CLI — query observability data from the command line"
   homepage "https://github.com/coralogix/cx-cli"
-  version "0.1.21"
+  version "0.1.23"
   license "Apache-2.0"
 
   on_macos do
     if Hardware::CPU.intel?
-      url "https://github.com/coralogix/cx-cli/releases/download/v0.1.21/cx-0.1.21-x86_64-apple-darwin.tar.gz"
-      sha256 "9643605b497f794470fa8843dbe0ed4458f3bc4771c539cd4ae2c08178a1a78d"
+      url "https://github.com/coralogix/cx-cli/releases/download/v0.1.23/cx-0.1.23-x86_64-apple-darwin.tar.gz"
+      sha256 "db2125f92d2fa4156d2474289b2ba3546ded51fa86dce0d0918f49c7d1d021d8"
     end
     if Hardware::CPU.arm?
-      url "https://github.com/coralogix/cx-cli/releases/download/v0.1.21/cx-0.1.21-aarch64-apple-darwin.tar.gz"
-      sha256 "6f052b19cffd295ec6bbe7b6d3a78087f5984bc39c8feb99dbf71bdd39865d1a"
+      url "https://github.com/coralogix/cx-cli/releases/download/v0.1.23/cx-0.1.23-aarch64-apple-darwin.tar.gz"
+      sha256 "4d2370bbeb6b0baa004e7038226999fe37f0577a765bce7f1dd655ca58739f92"
     end
   end
 
   on_linux do
     if Hardware::CPU.intel?
-      url "https://github.com/coralogix/cx-cli/releases/download/v0.1.21/cx-0.1.21-x86_64-unknown-linux-musl.tar.gz"
-      sha256 "bdbd9dfcc009bfe342d1e8221705b4cc763d8162b9b937914ebfa5a81751f711"
+      url "https://github.com/coralogix/cx-cli/releases/download/v0.1.23/cx-0.1.23-x86_64-unknown-linux-musl.tar.gz"
+      sha256 "41d1cbca9609ec214f4bd9a1d96df11da986e7de741b3901b746a1b76e52de8e"
     end
     if Hardware::CPU.arm?
-      url "https://github.com/coralogix/cx-cli/releases/download/v0.1.21/cx-0.1.21-aarch64-unknown-linux-musl.tar.gz"
-      sha256 "7aeacdb829152f94c2bdd75775e7dcc571e6607aa8ef3d5c5cb7a53007ac6f9b"
+      url "https://github.com/coralogix/cx-cli/releases/download/v0.1.23/cx-0.1.23-aarch64-unknown-linux-musl.tar.gz"
+      sha256 "62e7ab077555da6582855327ef64649566bf56202fb3e69fb65a2273b9cf0fb1"
     end
   end
 
